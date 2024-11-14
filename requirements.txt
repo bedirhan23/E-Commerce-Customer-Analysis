@@ -1,0 +1,10 @@
+pip install pandas numpy matplotlib seaborn scikit-learn
+pip install sqlalchemy psycopg2-binary  # SQL için gerekli paketler
+pip install boto3  # AWS entegrasyonu için
+pip install docker  # Docker ile çalışmak için
+
+import matplotlib
+matplotlib.use('TkAgg')  # Set backend before importing pyplot
+import matplotlib.pyplot as plt
+
+for the AttributeError: module 'backend_interagg' has no attribute 'FigureCanvas'
