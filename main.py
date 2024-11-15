@@ -8,7 +8,7 @@ from visualization import (
     plot_loyalty_score_kde, plot_satisfaction_vs_loyalty,
     plot_purchase_frequency_vs_satisfaction
 )
-from A_B_Testing import membership_spendingABTesting, membership_satisfactionABTesting
+from a_b_Testing import membership_spendingABTesting, membership_satisfactionABTesting
 
 # Veri Yükleme ve Temizleme
 data = load_and_clean_data('data/E-commerce Customer Behavior - Sheet1.csv')
