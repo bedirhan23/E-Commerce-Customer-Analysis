@@ -1,13 +1,16 @@
-# feature_engineering.py
-
-import pandas as pd
-
-
 def add_recency_satisfaction(data):
     def recent_satisfaction(row):
-        if row['Satisfaction Level'] >= 3 and row['Days Since Last Purchase'] < 30:
+        # Satisfaction Level ve Days Since Last Purchase'ın tipini kontrol et ve dönüştür
+        try:
+            satisfaction = int(row['Satisfaction Level'])
+            days_since = int(row['Days Since Last Purchase'])
+        except ValueError:
+            raise ValueError("Satisfaction Level ve Days Since Last Purchase sayısal değerlere dönüştürülemiyor.")
+
+        # Koşullara göre kategoriler atama
+        if satisfaction >= 3 and days_since < 30:
             return "High Recency Satisfaction"
-        elif row['Satisfaction Level'] <= 2 and row['Days Since Last Purchase'] >= 30:
+        elif satisfaction < 3 and days_since >= 30:
             return "Low Recency Satisfaction"
         else:
             return "Moderate Recency Satisfaction"
@@ -18,9 +21,17 @@ def add_recency_satisfaction(data):
 
 def add_satisfaction_dropoff(data):
     def satisfaction_dropoff(row):
-        if row['Satisfaction Level'] <= 2 and row['Days Since Last Purchase'] > 60:
+        # Satisfaction Level ve Days Since Last Purchase'ın tipini kontrol et ve dönüştür
+        try:
+            satisfaction = int(row['Satisfaction Level'])
+            days_since = int(row['Days Since Last Purchase'])
+        except ValueError:
+            raise ValueError("Satisfaction Level ve Days Since Last Purchase sayısal değerlere dönüştürülemiyor.")
+
+        # Koşullara göre kategoriler atama
+        if satisfaction <= 2 and days_since > 60:
             return "High Dropoff"
-        elif row['Satisfaction Level'] <= 2 and row['Days Since Last Purchase'] <= 60:
+        elif satisfaction <= 2 and days_since <= 60:
             return "Moderate Dropoff"
         else:
             return "Low Dropoff"
@@ -29,19 +40,25 @@ def add_satisfaction_dropoff(data):
     return data
 
 
+
 def add_high_spender_discount_feature(data):
-    # Yüksek harcama yapan ve indirim alan müşteri özellikleri
+    # High Spender ve Discount ile ilgili özellikler
     data['High_Spender'] = data['Total Spend'] > data['Total Spend'].mean()
-    data['Discount_and_High_Spend'] = (data['High_Spender'] & data['Discount Applied'])
+    data['Discount_and_High_Spend'] = data['High_Spender'] & data['Discount Applied']
     return data
 
 
 def add_purchase_frequency(data):
-    # Müşterinin alışveriş sıklığını analiz etmek için yeni bir özellik
+    # Days Since Last Purchase'ı sınıflandır
     def purchase_frequency(row):
-        if row['Days Since Last Purchase'] <= 30:
+        try:
+            days_since = int(row['Days Since Last Purchase'])
+        except ValueError:
+            raise ValueError("Days Since Last Purchase sayısal değere dönüştürülemiyor.")
+
+        if days_since <= 30:
             return 'Frequent Buyer'
-        elif row['Days Since Last Purchase'] <= 90:
+        elif days_since <= 90:
             return 'Occasional Buyer'
         else:
             return 'Rare Buyer'
@@ -51,8 +68,11 @@ def add_purchase_frequency(data):
 
 
 def add_loyalty_score(data):
-    # Müşteri bağlılık puanı, harcama miktarına ve memnuniyet düzeyine göre oluşturulmuş bir özellik
-    data['Loyalty Score'] = data['Total Spend'] * data['Satisfaction Level']
+    # Loyalty Score = Total Spend * Satisfaction Level
+    try:
+        data['Loyalty Score'] = data['Total Spend'] * data['Satisfaction Level'].astype(float)
+    except ValueError:
+        raise ValueError("Total Spend veya Satisfaction Level sayısal değere dönüştürülemiyor.")
     return data
 
 
@@ -63,13 +83,3 @@ def feature_engineering(data):
     data = add_purchase_frequency(data)
     data = add_loyalty_score(data)
     return data
-
-def check_features(data):
-    # 'Discount_and_High_Spend' ve 'Purchase Frequency' benzersiz değerleri ve 'Satisfaction Level' ortalamaları
-    print("Discount_and_High_Spend Özeti:")
-    print(data.groupby('Discount_and_High_Spend')['Satisfaction Level'].mean())
-    print("\nPurchase Frequency Özeti:")
-    print(data.groupby('Purchase Frequency')['Satisfaction Level'].mean())
-
-# # Özellik özetini çağır
-# check_features(data)
